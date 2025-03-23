@@ -31,6 +31,7 @@ class _DetailProjectState extends State<DetailProject> {
   FirebaseFirestore db = FirebaseFirestore.instance;
   TextEditingController? _titleController;
 
+  @override
   void initState(){
     super.initState();
     _titleController = TextEditingController();
@@ -56,7 +57,7 @@ class _DetailProjectState extends State<DetailProject> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Padding(
-                        padding: EdgeInsets.only(top: 20),
+                        padding: const EdgeInsets.only(top: 20),
                         child:TextField(
                           controller: _titleController,
                           keyboardType: TextInputType.text,

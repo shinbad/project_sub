@@ -9,13 +9,15 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Main Page',
       home: HomePage(),
     );
@@ -23,41 +25,80 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  String? dropdownValue;
+  String? dropdownValue = '전체';
   FirebaseFirestore db = FirebaseFirestore.instance;
   TextEditingController? _projectTitleController;
   TextEditingController? _search;
-  String searchTitle='';
+  String searchTitle = '';
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _projectTitleController=TextEditingController();
-    _search=TextEditingController();
+    _projectTitleController = TextEditingController();
+    _search = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _projectTitleController?.dispose();
+    _search?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Main Page'),
+        title: const Text('Main Page'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                Container(
+                    padding: const EdgeInsets.only(top: 20, bottom: 10),
+                    child: TextField(
+                      controller: _search,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.search_rounded),
+                          suffixIcon: searchTitle.isNotEmpty
+                              ? IconButton(
+                                  onPressed: () {
+                                    _search?.clear();
+                                    setState(() {
+                                      searchTitle = '';
+                                    });
+                                  },
+
+                                  icon: const Icon(Icons.cancel))
+                              : null,
+                          hintText: '프로젝트 이름으로 검색',
+                          isDense: true,
+                          border:
+                              OutlineInputBorder(borderSide: BorderSide.none),
+                          filled: true,
+                          fillColor: Color(0xffe8eaef)),
+                      onChanged: (value) {
+                        setState(() {
+                          searchTitle = value;
+                        });
+                      },
+                    )),
                 DropdownButton<String>(
-                  icon: Icon(Icons.list),
+                  icon: const Icon(Icons.arrow_drop_down),
                   onChanged: (newValue) {
                     setState(() {
                       print(newValue);
@@ -65,7 +106,7 @@ class _HomePageState extends State<HomePage> {
                     });
                   },
                   value: dropdownValue,
-                  items: <String>['진행중', '완료']
+                  items: <String>['전체', '진행중', '완료']
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -73,30 +114,21 @@ class _HomePageState extends State<HomePage> {
                     );
                   }).toList(),
                 ),
-                Container(
-                  padding: EdgeInsets.only(right: 20),
-                  width: 250,
-                    child: TextField(
-                      controller: _search,
-                      keyboardType: TextInputType.text,
-                      onChanged: (value){
-                        setState(() {
-                          searchTitle=value;
-                        });
-                      },
-                    )
-                )
               ],
             ),
             const SizedBox(height: 16.0),
             StreamBuilder(
-                stream: searchTitle.isEmpty? db
-                    .collection('Project')
-                    .where('complete',isEqualTo: dropdownValue)
-                    .snapshots(): db
-                    .collection('Project')
-                    .where('title',isEqualTo: searchTitle)
-                    .snapshots(),
+                stream: searchTitle.isEmpty
+                    ? (dropdownValue == '전체'
+                        ? db.collection('Project').snapshots()
+                        : db
+                            .collection('Project')
+                            .where('complete', isEqualTo: dropdownValue)
+                            .snapshots())
+                    : db
+                        .collection('Project')
+                        .where('title', isEqualTo: searchTitle)
+                        .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return const CircularProgressIndicator();
@@ -111,14 +143,14 @@ class _HomePageState extends State<HomePage> {
                           child: Card(
                             margin: const EdgeInsets.only(bottom: 10),
                             child: Container(
-                              margin: EdgeInsets.all(5),
+                              margin: const EdgeInsets.all(5),
                               child: ListTile(
                                 title: Container(
                                   margin: const EdgeInsets.only(bottom: 5),
                                   child: Text(
                                     item!['title'],
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ),
@@ -136,10 +168,10 @@ class _HomePageState extends State<HomePage> {
                           },
                           onLongPress: () {
                             AlertDialog dialog = AlertDialog(
-                              title: Text('삭제'),
+                              title: const Text('삭제'),
                               content: Text(
                                 '${item['title']}을 삭제하시겠습니까?',
-                                style: TextStyle(fontSize: 20.0),
+                                style: const TextStyle(fontSize: 20.0),
                               ),
                               actions: [
                                 TextButton(
@@ -172,51 +204,49 @@ class _HomePageState extends State<HomePage> {
                     ),
                   );
                 }),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text('프로젝트 추가'),
-                    content: TextField(
-                      controller: _projectTitleController,
-                      keyboardType: TextInputType.text,
-                      maxLines: 1,
-                      decoration: const InputDecoration(
-                        hintText: '제목'
-                      ),
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Text('취소'),
-                      ),
-                      TextButton(
-                        onPressed:(){
-                          final data = {
-                            "date": " ",
-                            "title": _projectTitleController!.value.text,
-                            "complete": "진행중",
-                            "progress":0.0
-                          };
-                          db
-                              .collection('Project')
-                              .add(data);
-                          Navigator.of(context).pop();
-                        },
-                        child: Text('추가'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              child: Text('프로젝트 생성'),
-            ),
+            const SizedBox(height: 16.0),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('프로젝트 추가'),
+              content: TextField(
+                controller: _projectTitleController,
+                keyboardType: TextInputType.text,
+                maxLines: 1,
+                decoration: const InputDecoration(hintText: '제목'),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    _projectTitleController?.clear();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('취소'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    final data = {
+                      "date": " ",
+                      "title": _projectTitleController!.value.text,
+                      "complete": "진행중",
+                      "progress": 0.0
+                    };
+                    db.collection('Project').add(data);
+                    _projectTitleController?.clear();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('추가'),
+                ),
+              ],
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

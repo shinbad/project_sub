@@ -57,7 +57,7 @@ class _taskEditor extends State<taskEditor> {
                       child: Text('이름'),
                     ),
                     Padding(
-                      padding: EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(10),
                       child: TextField(                           //제목 변경 위젯
                         controller: _textEditController,
                         onChanged: (text) {
@@ -80,7 +80,7 @@ class _taskEditor extends State<taskEditor> {
                       child: Text('일정'),
                     ),
                     Padding(
-                        padding: EdgeInsets.only(right: 270, bottom: 10),
+                        padding: const EdgeInsets.only(right: 270, bottom: 10),
                         child: Column(
                           children: <Widget>[
                             ElevatedButton(
@@ -118,7 +118,7 @@ class _taskEditor extends State<taskEditor> {
                       child: Text('상태'),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(right: 300, bottom: 10),
+                      padding: const EdgeInsets.only(right: 300, bottom: 10),
                       child: TextButton(
                         child: Text(stateValue),
                         onPressed: () {
@@ -210,10 +210,10 @@ class _taskEditor extends State<taskEditor> {
                       child: Text('평가 점수'),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 30, bottom: 10),
+                      padding: const EdgeInsets.only(left: 30, bottom: 10),
                       child: Row(
                         children: <Widget>[
-                          Icon(Icons.edit),
+                          const Icon(Icons.edit),
                           Text('${penValue.round()}')                           //슬라이더 위젯으로 변경한 데이터 값을 화면에 출력
                         ],
                       ),
@@ -232,7 +232,7 @@ class _taskEditor extends State<taskEditor> {
                           },
                         )),
                     Padding(
-                      padding: EdgeInsets.all(15),
+                      padding: const EdgeInsets.all(15),
                       child: ElevatedButton(
                         onPressed: () {
                           updateData(inputTitle, stateValue, _selectedDate,              //버튼 선택시 DB인 firebase에 값을 업데이트하는 위젯
@@ -252,14 +252,14 @@ class _taskEditor extends State<taskEditor> {
     );
   }
 
-  void updateData(String inputTitle, String stateValue, String _selectedDate,        //firebase에 값을 업데이트하는 함수
+  void updateData(String inputTitle, String stateValue, String selectedDate,        //firebase에 값을 업데이트하는 함수
       double starValue1, double penValue) {
     final firestoreInstance =
         product.collection('Project').doc(widget.projectId).collection('Task').doc(widget.taskId);
     firestoreInstance.update({
       "title": inputTitle,
       "state": stateValue,
-      "date": _selectedDate,
+      "date": selectedDate,
       "importance": starValue1,
       "evaluation": penValue,
     });
